@@ -61,6 +61,7 @@ Submit the following files:
 	* Screenshot(s) of your QEMU output demonstrating priority scheduling.
 	* Description of how you implemented priority scheduling.
 	* Answer to the Question: To block context switching, which line should be commented out in each task? Explain why.
+    **(or you can put the most significant function name (from scheduler.cpp) that involved in context switching and describe it.)**
 
 ### Useful Link
 
