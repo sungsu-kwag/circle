@@ -1,4 +1,4 @@
-# ENEE447 2024 Spring Project 2: Preemptive Multitasking (Initiated by Timer Interrupt)
+# ENEE447 2025 Spring Project 2: Preemptive Multitasking (Initiated by Timer Interrupt)
 
 ## Purpose
 - In this project, you will design and implement **preemptive multitasking** in Circle by utilizing an IRQ handler triggered by timer interrupts.
@@ -55,7 +55,7 @@
     Task A is running.
     ```
 
-## Required Submission (Due Date : 3/2)
+## Required Submission (Due Date : 3/23)
 Submit the following on ELMS before your lab:
 1. **Source Code Modifications:**
    - The modified `exceptionstub.S` file (with your implementations under the label `do_context_switch_on_irq_return`).
