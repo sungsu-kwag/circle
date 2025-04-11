@@ -1,4 +1,4 @@
-# ENEE447 2024 Spring Project 3: Preemptive Multitasking + Cooperative Multitasking 
+# ENEE447 2025 Spring Project 3: Preemptive Multitasking + Cooperative Multitasking 
 
 ## What are we doing in this project?
 In this project, we will try to combine cooperative multitasking (which we have studied in project 1) and preemptive multitasking (which we have implemented in project 2).
