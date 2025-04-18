@@ -1,69 +1,59 @@
-# ENEE447 2024 Spring Project 4: Running a task in user mode with its own virtual memory space
+# ENEE447 2025 Spring Project 4: Running a Task in User Mode with Its Own Virtual Memory Space  
 
-## What are we doing in this project?
-In this project, we will try to run a task in user mode with its own virtual memory space.
-Specifically, this means:
-- The task won't be able to execute privileged instructions.
-- Multiple tasks can use the same memory region (for storing a task's binary codes, placing the task's stack, etc.) as long as their page tables map the memory region into different physical pages.
+## What are we doing in this project?  
+In this project, we will run **one task in user mode** and give it **its own virtual‑memory (VM) space**.
 
-### Why do we want to do this?
-- [Principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege): User codes can be malicious or buggy. By limiting its privileges, we can limit the damage it can cause.
-- Better memory security: 
-  - Tasks can no longer access each other's memory because their page tables map their memory space into different physical pages.
-    - However, in some cases we do want tasks to share memory. For example:
-      - If multiple tasks import the same library, we can save memory space by having one copy of the library in physical memory and make each task's page table map into it. This is called a [shared library](https://en.wikipedia.org/wiki/Library_(computing)#Shared_libraries).
-      - Two tasks may want shared memory for [inter-process communication](https://en.wikipedia.org/wiki/Inter-process_communication).
-      - ...
-    - In this case, the OS kernel needs to implement a mechanism for shared memory (which we currently don't have).
-  - We can mark pages that contain kernel code as privileged so that user code cannot access it.
-  - ...
-- ...
+- **Q:** *Why would we want to do that?*  
+- **A:** For the same reasons modern OSes do:  
+	- **Principle of least privilege.** User code can be buggy or hostile; if it runs with minimal privilege it can do minimal harm.  
+	- **Stronger memory isolation.**  
+		- Each task’s page table maps the *same* virtual addresses to *different* physical pages, so tasks cannot clobber each other’s data.  
+		- Sometimes controlled sharing is useful (shared libraries, inter‑process communication, …). That requires extra kernel support that we do **not** implement here.  
+		- Kernel pages can be marked privileged so user code cannot even read them.  
 
-## Specifically, we are trying to solve the following two problems:
+## Specifically, we are trying to solve the following two problems  
 
-### Before you start, copy your project 3 solution to [here](../../lib/sched/taskswitch.S#L27-L30) and [here](../../lib/sched/scheduler.cpp#L1).
+### Before you start  
+Copy your **Project 3** solution to the locations below so Project 4 can compile (We will publish the solution after the extended deadline of project 3, you can use your own solution for starting.):  
 
-### Problem 1 : Set up virtual memory for the user mode task.
-- Currently, when we run this sample, it will have an error:
+- [`taskswitch.S`](../../lib/sched/taskswitch.S#L27-L30)  
+- [`scheduler.cpp`](../../lib/sched/scheduler.cpp#L1)  
 
-<img src="img/project 4 after copying p3 sol_part 1 init state_Run called.png" width="500">
+### Problem 1: Set up virtual memory for the user‑mode task  
+- **Current behaviour.** The demo crashes immediately:  
 
-- After we have set up VM for the user mode task correctly, the sample should run without errors but also without output:
+  <img src="img/project 4 after copying p3 sol_part 1 init state_Run called.png" width="500">  
 
-<img src="img/project 4 after impl vm_user task runs but no output_need syscall impl.png" width="500">
+- **Goal.** After you set up VM correctly, the program runs silently (no output yet, no crash):  
 
-#### Specifically, to solve problem 1, you are supposed to do the following:
-- Implement the following TODOs:
-  - TODOs in [`task.cpp`](../../lib/sched/task.cpp#L204-L260)
-  - You can edit `task.h` as well. 
-  
-### Problem 2 : Implement system calls so that the user task can trap into kernel mode and do privileged things
-- At the end of problem 1, we have the user task running but there is no output.
-- But the user task should have output. See its definition [here](user_mode_task/main.c).
-- The reason why there is no output is because all the [system calls used by the user task are not yet implemented](user_mode_task/my_c_library.c#L43-L81).
-- After the system calls are implemented, the output should look like this:
+  <img src="img/project 4 after impl vm_user task runs but no output_need syscall impl.png" width="500">  
 
-<img src="img/project 4 after impl syscall_user task now runs and print.png" width="500">
+#### Specifically, to solve Problem 1 you should  
+1. Complete the `TODO`s in [`task.cpp`](../../lib/sched/task.cpp#L204-L260).  
+2. Edit [`task.h`](../../include/circle/sched/task.h) if needed.  
 
-#### Specifically, to solve problem 2, you are supposed to do the following:
-- Implement the following TODOs:
-  - TODOs in [`syscallhandler.cpp`](../../lib/syscallhandler.cpp#L10)
+### Problem 2: Implement system calls so the user task can trap into kernel mode  
+At the end of Problem 1 the user task is alive but mute; all its library syscalls are stubs.  
+Once syscalls are handled, you should see output like this:
 
-## What to submit on ELMS before your lab in the week of May 5th:
-1. A pdf that has:
-	- Members of your group.
-	- A screenshot/photo that shows problem 1 is solved.
-	- A screenshot/photo that shows problem 2 is solved.
-1. `task.cpp` in which you have implemented the TODOs. (You can edit `task.h`)
-1. `syscallhandler.cpp` in which you have implemented the TODOs.
-1. Description of your implementation **in detail**
+<img src="img/project 4 after impl syscall_user task now runs and print.png" width="500">  
 
-## Documents for reference
-- [1] [ARM Architecture Reference Manual](https://documentation-service.arm.com/static/5f8dacc8f86e16515cdb865a)
-- [2] [ARM1176JZF-S Technical Reference Manual](https://developer.arm.com/documentation/ddi0301/latest/)
-	- ARM1176JZF-S is the processor used in Raspberry Pi Zero according to [here](https://www.raspberrypi.com/documentation/computers/processors.html).
-	-  **NOTE: This ARM processor supports two ISAs -- the original [ARM ISA](https://en.wikipedia.org/wiki/ARM_architecture_family#Instruction_set), which we will be using for this project, and [Thumb ISA](https://en.wikipedia.org/wiki/ARM_architecture_family#Thumb). When we read these documents, we only need to read texts that are relevant to ARM ISA (texts that mention "ARM state") not thumb ISA (texts that mention "thumb state").**
-		- For example, when trying to learn what registers are available to us, we should read the section ["The ARM state core register set"](https://developer.arm.com/documentation/ddi0301/h/programmer-s-model/registers/the-arm-state-core-register-set?lang=en) instead of the section ["The Thumb state core register set"](https://developer.arm.com/documentation/ddi0301/h/programmer-s-model/registers/the-thumb-state-core-register-set?lang=en)
-- [3] [ARM Procedure Call Standard](https://developer.arm.com/documentation/dui0041/c/ARM-Procedure-Call-Standard)
+#### Specifically, to solve Problem 2 you should  
+- Fill in the `TODO`s in [`syscallhandler.cpp`](../../lib/syscallhandler.cpp#L10).  
 
+## What to submit on ELMS
+1. **One PDF** that contains  
+	- The names of all group members.  
+	- A screenshot (or photo) proving *Problem 1* is solved.  
+	- A screenshot (or photo) proving *Problem 2* is solved.  
+2. Your modified `task.cpp` (and `task.h` if changed).  
+3. Your modified `syscallhandler.cpp`.  
+4. A **detailed explanation** of what you changed and why.  
 
+## Documents for reference  
+- [1] [ARM Architecture Reference Manual](https://documentation-service.arm.com/static/5f8dacc8f86e16515cdb865a)  
+- [2] [ARM1176JZF‑S Technical Reference Manual](https://developer.arm.com/documentation/ddi0301/latest/)  
+	- Raspberry Pi Zero uses the ARM1176JZF‑S CPU.  
+	- **NOTE:** The core supports two ISAs—ARM and Thumb. We use **ARM ISA** only; ignore text that refers to *Thumb state*.  
+		- For example, read “The **ARM‑state** core register set” instead of “The Thumb‑state core register set.”  
+- [3] [ARM Procedure Call Standard](https://developer.arm.com/documentation/dui0041/c/ARM-Procedure-Call-Standard)  
